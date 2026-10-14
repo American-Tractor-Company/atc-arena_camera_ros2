@@ -113,6 +113,10 @@ void ArenaCameraNode::parse_parameters_()
     nextParameterToDeclare = "gev_scftd";
     gev_scftd_ = this->declare_parameter<int64_t>("gev_scftd", 0);
 
+    nextParameterToDeclare = "link_throughput_limit";
+    link_throughput_limit_ =
+        this->declare_parameter<int64_t>("link_throughput_limit", 0);
+
     nextParameterToDeclare = "mtu";
     mtu_ = this->declare_parameter<int64_t>("mtu", 1500);
 
@@ -772,6 +776,9 @@ void ArenaCameraNode::set_nodes_()
   set_nodes_exposure_();
   set_nodes_target_brightness_();
   set_nodes_gamma_();
+  // The throughput limit caps the maximum frame rate, so apply it before the
+  // frame rate is set.
+  set_nodes_link_throughput_limit_();
   if (trigger_mode_activated_) {
     // trigger_mode=true: synchronized capture via PTP + scheduled GigE Vision
     // action commands. The action command gates every frame, so the free-run
@@ -1039,12 +1046,41 @@ void ArenaCameraNode::set_nodes_ptp_()
            (ptp_slave_only_ ? "true" : "false") + ")");
 }
 
+void ArenaCameraNode::set_nodes_link_throughput_limit_()
+{
+  // Cap how fast the camera sends, in bytes per second, so cameras sharing one
+  // GigE link fit within it. 0 leaves the camera default.
+  if (link_throughput_limit_ <= 0) {
+    return;
+  }
+  auto nodemap = m_pDevice->GetNodeMap();
+  Arena::SetNodeValue<GenICam::gcstring>(nodemap,
+                                         "DeviceLinkThroughputLimitMode", "On");
+  Arena::SetNodeValue<int64_t>(nodemap, "DeviceLinkThroughputLimit",
+                               link_throughput_limit_);
+  const auto mode = Arena::GetNodeValue<GenICam::gcstring>(
+      nodemap, "DeviceLinkThroughputLimitMode");
+  const auto actual =
+      Arena::GetNodeValue<int64_t>(nodemap, "DeviceLinkThroughputLimit");
+  if (mode != "On" || actual != link_throughput_limit_) {
+    throw std::runtime_error(
+        "DeviceLinkThroughputLimit readback " + std::to_string(actual) +
+        " does not match requested " + std::to_string(link_throughput_limit_));
+  }
+  log_info(std::string("\tDeviceLinkThroughputLimit set to ") +
+           std::to_string(actual) + " bytes/s");
+}
+
 void ArenaCameraNode::set_nodes_frame_rate_()
 {
   auto nodemap = m_pDevice->GetNodeMap();
   Arena::SetNodeValue<bool>(nodemap, "AcquisitionFrameRateEnable", true);
   Arena::SetNodeValue<double>(nodemap, "AcquisitionFrameRate", frame_rate_);
-  log_info(std::string("\tAcquisitionFrameRate set to ") + std::to_string(frame_rate_));
+  // The camera clamps the rate to what the ROI and throughput limit allow.
+  log_info(std::string("\tAcquisitionFrameRate set to ") +
+           std::to_string(frame_rate_) + ", read back " +
+           std::to_string(Arena::GetNodeValue<double>(nodemap,
+                                                      "AcquisitionFrameRate")));
 }
 
 void ArenaCameraNode::set_nodes_transmission_delay_()

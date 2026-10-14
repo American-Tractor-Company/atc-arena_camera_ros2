@@ -143,6 +143,7 @@ class ArenaCameraNode : public rclcpp::Node
   // TRANSMISSION only, not exposure/capture, so header.stamp sync is unchanged.
   int64_t gev_scpd_;                    // packet delay
   int64_t gev_scftd_;                   // frame-transmission delay (per-camera)
+  int64_t link_throughput_limit_;       // DeviceLinkThroughputLimit bytes/s; 0 = camera default
   int64_t mtu_;                         // GevSCPSPacketSize; 1500=standard, up to 9000 for jumbo frames
 
   bool white_balance_enable_;           // BalanceWhiteEnable; master toggle for white balance correction
@@ -178,6 +179,7 @@ class ArenaCameraNode : public rclcpp::Node
   void set_nodes_trigger_mode_();
   void set_nodes_action_trigger_mode_();
   void set_nodes_ptp_();
+  void set_nodes_link_throughput_limit_();
   void set_nodes_frame_rate_();
   void set_nodes_transmission_delay_();
   void set_nodes_mtu_();

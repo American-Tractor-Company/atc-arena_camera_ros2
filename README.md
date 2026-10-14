@@ -245,6 +245,13 @@ These parameters affect packet transmission timing only — they do not affect c
   - `0` = leave camera default.
   - Default: `0`
 
+- **link_throughput_limit**
+  - Caps how fast the camera sends, in bytes per second (integer), via `DeviceLinkThroughputLimit`. Use it so cameras sharing one GigE link fit within it.
+  - The camera lowers its maximum frame rate to match. The node reads the limit back and fails to start if the camera did not accept the exact value.
+  - With synchronized triggering, each camera's frame takes `frame bytes / limit` seconds to send, and the staggered sends must fit within one trigger period.
+  - `0` = leave camera default.
+  - Default: `0`
+
 - **mtu**
   - GigE Vision stream channel packet size (`GevSCPSPacketSize`) in bytes (integer).
   - Set to `9000` to enable jumbo frames (requires the NIC and switch to also be configured for jumbo frames at the OS level).
