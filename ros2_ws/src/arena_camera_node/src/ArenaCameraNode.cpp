@@ -351,6 +351,9 @@ void ArenaCameraNode::publish_images_()
     try {
       auto p_image_msg = std::make_unique<sensor_msgs::msg::Image>();
       pImage = m_pDevice->GetImage(1000);
+      if (drop_if_incomplete_(pImage)) {
+        continue;
+      }
       msg_form_image_(pImage, *p_image_msg);
 
       m_pub_->publish(std::move(p_image_msg));
@@ -388,6 +391,9 @@ void ArenaCameraNode::publish_images_action_()
     try {
       pImage = m_pDevice->GetImage(
           static_cast<uint64_t>(action_get_image_timeout_ms_));
+      if (drop_if_incomplete_(pImage)) {
+        continue;
+      }
       auto p_image_msg = std::make_unique<sensor_msgs::msg::Image>();
       msg_form_image_(pImage, *p_image_msg);
       m_pub_->publish(std::move(p_image_msg));
@@ -416,6 +422,21 @@ void ArenaCameraNode::publish_images_action_()
                e.what());
     }
   }
+}
+
+bool ArenaCameraNode::drop_if_incomplete_(Arena::IImage*& pImage)
+{
+  // A GigE Vision buffer is incomplete when any of its packets were lost and
+  // not resent in time. Publishing it would show up downstream as bands or
+  // shifted blocks, so requeue it and report the drop instead.
+  if (!pImage->IsIncomplete()) {
+    return false;
+  }
+  log_warn(std::string("Dropping incomplete image ") +
+           std::to_string(pImage->GetFrameId()));
+  m_pDevice->RequeueBuffer(pImage);
+  pImage = nullptr;
+  return true;
 }
 
 bool ArenaCameraNode::wait_for_ptp_lock_()

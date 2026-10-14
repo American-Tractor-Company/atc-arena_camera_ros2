@@ -252,6 +252,12 @@ These parameters affect packet transmission timing only — they do not affect c
 
 ---
 
+### Incomplete Frames
+
+An image is incomplete when some of its GigE Vision packets were lost and not resent in time. The node never publishes incomplete images: it requeues the buffer and logs `Dropping incomplete image <frame id>` at warn level. A gap in the published `frame_id` counter shows where a frame was dropped.
+
+---
+
 ### QoS Settings
 
 Make sure the publisher and any subscriber use matching QoS settings, otherwise images will be published but the subscriber will not receive them.

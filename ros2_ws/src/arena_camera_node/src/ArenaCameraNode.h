@@ -190,6 +190,8 @@ class ArenaCameraNode : public rclcpp::Node
   // single_shot=true rounds up to the next whole second; false steps by the
   // continuous period.
   void fire_scheduled_action_command_(bool single_shot);
+  // Requeue and log an incomplete buffer; returns true if it was dropped.
+  bool drop_if_incomplete_(Arena::IImage*& pImage);
   // Block until this device's PtpStatus settles on "Slave" (or timeout).
   bool wait_for_ptp_lock_();
   // /trigger_all service handler (one synchronized shot).
