@@ -1,13 +1,5 @@
 # Report an issue
-Please reach out to the support team https://support.thinklucid.com/contact-support/ 
-Or email to support@thinklucid.com
 
-# arena_camera_ros2
-Arena Camera deriver for ROS2
-
-# Note
-- Please provide your feedback is welcomed at support@thinklucid.com or the repo issue page
-      
 # Requirements
 - 1 
   - OS       : Linux (x64/amd64/arm64) (==22.04) 
