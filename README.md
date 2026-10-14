@@ -84,6 +84,11 @@ The main node. Represents one LUCID camera. Executables: `start` and `trigger_im
   - Height of the captured image in pixels.
   - Default: camera's default user profile value.
 
+- **offset_x**, **offset_y**
+  - Position of the captured region within the sensor, in pixels (integer). Use with `width`/`height` to crop.
+  - The node reads the region back and fails to start if the camera did not accept it exactly.
+  - Default: camera's default user profile value.
+
 - **pixelformat**
   - Pixel format of the published image.
   - Supported values: `rgb8`, `rgba8`, `rgb16`, `rgba16`, `bgr8`, `bgra8`, `bgr16`, `bgra16`,

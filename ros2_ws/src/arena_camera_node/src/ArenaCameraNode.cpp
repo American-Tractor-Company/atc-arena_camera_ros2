@@ -32,6 +32,14 @@ void ArenaCameraNode::parse_parameters_()
     height_ = this->declare_parameter("height", 0);
     is_passed_height = height_ > 0;
 
+    nextParameterToDeclare = "offset_x";
+    offset_x_ = this->declare_parameter<int64_t>("offset_x", -1);
+    is_passed_offset_x_ = offset_x_ >= 0;
+
+    nextParameterToDeclare = "offset_y";
+    offset_y_ = this->declare_parameter<int64_t>("offset_y", -1);
+    is_passed_offset_y_ = offset_y_ >= 0;
+
     nextParameterToDeclare = "gain";
     gain_ = this->declare_parameter("gain", -1.0);
     is_passed_gain_ = gain_ >= 0;
@@ -828,6 +836,15 @@ void ArenaCameraNode::set_nodes_roi_()
 {
   auto nodemap = m_pDevice->GetNodeMap();
 
+  // An offset limits how large the region can be, so clear the offsets before
+  // changing the size and apply the requested offsets afterwards.
+  if (is_passed_offset_x_) {
+    Arena::SetNodeValue<int64_t>(nodemap, "OffsetX", 0);
+  }
+  if (is_passed_offset_y_) {
+    Arena::SetNodeValue<int64_t>(nodemap, "OffsetY", 0);
+  }
+
   // Width -------------------------------------------------
   if (is_passed_width) {
     Arena::SetNodeValue<int64_t>(nodemap, "Width", width_);
@@ -842,9 +859,33 @@ void ArenaCameraNode::set_nodes_roi_()
     height_ = Arena::GetNodeValue<int64_t>(nodemap, "Height");
   }
 
-  // TODO only if it was passed by ros arg
-  log_info(std::string("\tROI set to ") + std::to_string(width_) + "X" +
-           std::to_string(height_));
+  // Offsets -----------------------------------------------
+  if (is_passed_offset_x_) {
+    Arena::SetNodeValue<int64_t>(nodemap, "OffsetX", offset_x_);
+  }
+  if (is_passed_offset_y_) {
+    Arena::SetNodeValue<int64_t>(nodemap, "OffsetY", offset_y_);
+  }
+
+  const auto actual_width = Arena::GetNodeValue<int64_t>(nodemap, "Width");
+  const auto actual_height = Arena::GetNodeValue<int64_t>(nodemap, "Height");
+  const auto actual_offset_x = Arena::GetNodeValue<int64_t>(nodemap, "OffsetX");
+  const auto actual_offset_y = Arena::GetNodeValue<int64_t>(nodemap, "OffsetY");
+  if ((is_passed_width && actual_width != static_cast<int64_t>(width_)) ||
+      (is_passed_height && actual_height != static_cast<int64_t>(height_)) ||
+      (is_passed_offset_x_ && actual_offset_x != offset_x_) ||
+      (is_passed_offset_y_ && actual_offset_y != offset_y_)) {
+    throw std::runtime_error(
+        "ROI readback " + std::to_string(actual_width) + "x" +
+        std::to_string(actual_height) + "+" + std::to_string(actual_offset_x) +
+        "+" + std::to_string(actual_offset_y) +
+        " does not match the requested ROI");
+  }
+
+  log_info(std::string("\tROI set to ") + std::to_string(actual_width) + "X" +
+           std::to_string(actual_height) + " at offset " +
+           std::to_string(actual_offset_x) + "," +
+           std::to_string(actual_offset_y));
 }
 
 void ArenaCameraNode::set_nodes_gain_()

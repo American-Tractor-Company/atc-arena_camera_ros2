@@ -102,6 +102,12 @@ class ArenaCameraNode : public rclcpp::Node
   size_t height_;
   bool is_passed_height;
 
+  int64_t offset_x_;
+  bool is_passed_offset_x_;
+
+  int64_t offset_y_;
+  bool is_passed_offset_y_;
+
   double gain_;
   bool is_passed_gain_;
 
