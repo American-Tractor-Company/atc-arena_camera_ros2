@@ -136,6 +136,7 @@ class ArenaCameraNode : public rclcpp::Node
   int64_t action_get_image_timeout_ms_; // GetImage timeout in action loop
   int64_t ptp_domain_;                  // applied only when non-zero
   double ptp_lock_timeout_sec_;         // max wait for PtpStatus == "Slave"
+  bool ptp_slave_only_;                 // false lets this camera become PTP master
   // GigE Vision stream-channel transmission shaping (0 = leave camera default).
   // Used to stagger when each camera transmits its already-captured frame so
   // the six synchronized frames do not all hit the host at once. Affects

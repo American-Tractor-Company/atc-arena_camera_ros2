@@ -150,6 +150,7 @@ Existing params (`serial`, `pixelformat`, `exposure_time`, `gamma`,
 | `action_trigger_rate` | double (Hz) | `0.0` | `>0` on the master enables continuous triggering. `0` = one-shot only (fire via `/trigger_all`). |
 | `action_get_image_timeout` | int (ms) | `1000` | GetImage timeout in the acquisition loop (timeouts swallowed). |
 | `ptp_domain` | int | `0` | PTP domain. Applied only when non-zero (best effort). |
+| `ptp_slave_only` | bool | `true` | `PtpSlaveOnly`. Set `false` on exactly one camera when there is no external grandmaster, so it can become master. Keep `action_master` on a different camera. |
 | `ptp_lock_timeout` | double (s) | `60.0` | Max wait for `PtpStatus == Slave` before refusing to fire. |
 | `gev_scpd` | int | `0` | GigE stream-channel packet delay (transmission shaping). `0` = unchanged. |
 | `gev_scftd` | int | `0` | GigE stream-channel frame-transmission delay (per-camera stagger). `0` = unchanged. |

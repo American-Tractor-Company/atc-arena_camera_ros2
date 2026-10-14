@@ -200,6 +200,12 @@ These parameters enable frame-accurate synchronized capture across multiple came
   - `0` leaves the camera at its default; non-zero values are applied in a try/catch since not every LUCID model exposes a writable domain node.
   - Default: `0`
 
+- **ptp_slave_only**
+  - Sets the camera's `PtpSlaveOnly` (bool). `true` keeps the camera out of the PTP master election.
+  - Leave `true` on every camera when an external grandmaster (e.g. an RTK receiver) serves PTP.
+  - Without an external grandmaster, set it to `false` on exactly one camera so that camera becomes master, and keep `action_master` on a different camera: the action master only fires once its own camera reports `Slave`.
+  - Default: `true`
+
 - **ptp_lock_timeout**
   - Maximum seconds to wait for `PtpStatus == "Slave"` before refusing to fire an action command (double).
   - Default: `60.0`

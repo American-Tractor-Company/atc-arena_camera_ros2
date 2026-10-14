@@ -94,6 +94,12 @@ void ArenaCameraNode::parse_parameters_()
     nextParameterToDeclare = "ptp_domain";
     ptp_domain_ = this->declare_parameter<int64_t>("ptp_domain", 0);
 
+    // PtpSlaveOnly keeps a camera out of the PTP master election. Leave it true
+    // when an external grandmaster (e.g. an RTK receiver) serves PTP. Without
+    // one, set it false on exactly one camera so that camera can become master.
+    nextParameterToDeclare = "ptp_slave_only";
+    ptp_slave_only_ = this->declare_parameter("ptp_slave_only", true);
+
     nextParameterToDeclare = "ptp_lock_timeout";
     ptp_lock_timeout_sec_ = this->declare_parameter("ptp_lock_timeout", 60.0);
 
@@ -987,7 +993,7 @@ void ArenaCameraNode::set_nodes_ptp_()
 {
   auto nodemap = m_pDevice->GetNodeMap();
   Arena::SetNodeValue<bool>(nodemap, "PtpEnable", true);
-  Arena::SetNodeValue<bool>(nodemap, "PtpSlaveOnly", true);
+  Arena::SetNodeValue<bool>(nodemap, "PtpSlaveOnly", ptp_slave_only_);
   // The PTP domain must match the grandmaster (OXTS RTK) and the switch.
   // Default (0) leaves the camera at its default assumption, so the original
   // behavior is unchanged. A non-zero value is attempted in a try/catch since
@@ -1008,7 +1014,8 @@ void ArenaCameraNode::set_nodes_ptp_()
           e.what());
     }
   }
-  log_info("\tPTP enabled (slave-only mode)");
+  log_info(std::string("\tPTP enabled (PtpSlaveOnly=") +
+           (ptp_slave_only_ ? "true" : "false") + ")");
 }
 
 void ArenaCameraNode::set_nodes_frame_rate_()
