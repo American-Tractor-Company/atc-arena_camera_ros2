@@ -71,11 +71,6 @@ The main node. Represents one LUCID camera. Executables: `start` and `trigger_im
   - Default: `/arena_camera_node/images`
   - Example: `-p topic:=/cam0/images`
 
-- **camera_name**
-  - Name given to the camera; used as the `frame_id` in the image message header.
-  - Default: `arena_camera`
-  - Example: `-p camera_name:=front_left`
-
 - **width**
   - Width of the captured image in pixels.
   - Default: camera's default user profile value.
@@ -217,7 +212,7 @@ These parameters enable frame-accurate synchronized capture across multiple came
 
   **Synchronized multi-camera example (6 cameras, camera 0 is master):**
   ```
-  # On each camera node (adjust serial, camera_name, topic, gev_scftd per camera):
+  # On each camera node (adjust serial, topic, gev_scftd per camera):
   ros2 run arena_camera_node start --ros-args \
     -p serial:=<SN> -p trigger_mode:=true -p exposure_time:=5000 \
     -p action_master:=false \
@@ -292,6 +287,13 @@ Make sure the publisher and any subscriber use matching QoS settings, otherwise 
 
 ---
 
+## Published Image Header
+
+- `header.stamp` is the camera's capture timestamp (`GetTimestampNs()`), in the camera's PTP time when PTP is enabled.
+- `header.frame_id` is the camera's frame counter (`GetFrameId()`), as a decimal string. Gaps show frames that were dropped.
+
+---
+
 ## Services
 
 - **`<node_name>/trigger_image`**
@@ -311,7 +313,6 @@ Make sure the publisher and any subscriber use matching QoS settings, otherwise 
 ros2 run arena_camera_node start --ros-args \
   -p serial:=904240001 \
   -p topic:=/cam0/images \
-  -p camera_name:=front_left \
   -p width:=1920 \
   -p height:=1080 \
   -p pixelformat:=rgb8 \

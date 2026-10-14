@@ -137,7 +137,7 @@ camera's buffer overruns. At 30 Hz (33 ms period) and ~6 ms/frame, Δ ≈ 4 ms w
 ## 5. Parameters
 
 Existing params (`serial`, `pixelformat`, `exposure_time`, `gamma`,
-`target_brightness`, `frame_rate`, `topic`, `camera_name`, QoS…) behave as before.
+`target_brightness`, `frame_rate`, `topic`, QoS…) behave as before.
 `trigger_mode` (existing) now selects synchronized action capture. New params:
 
 | Param | Type | Default | Meaning |

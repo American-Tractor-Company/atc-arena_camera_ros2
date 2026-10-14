@@ -94,7 +94,6 @@ class ArenaCameraNode : public rclcpp::Node
   bool is_passed_serial_;
 
   std::string topic_;
-  std::string camera_name_;
 
   size_t width_;
   bool is_passed_width;

@@ -134,10 +134,6 @@ void ArenaCameraNode::parse_parameters_()
     nextParameterToDeclare = "white_balance_auto";
     white_balance_auto_ = this->declare_parameter("white_balance_auto", std::string("Continuous"));
 
-    nextParameterToDeclare = "camera_name";
-    camera_name_ = this->declare_parameter("camera_name", "arena_camera");
-    // no need to is_passed_camera_name_
-
     nextParameterToDeclare = "topic";
     topic_ = this->declare_parameter(
         "topic", std::string("/") + this->get_name() + "/images");
@@ -624,7 +620,9 @@ void ArenaCameraNode::msg_form_image_(Arena::IImage* pImage,
         static_cast<uint32_t>(pImage->GetTimestampNs() / 1000000000);
     image_msg.header.stamp.nanosec =
         static_cast<uint32_t>(pImage->GetTimestampNs() % 1000000000);
-    image_msg.header.frame_id = camera_name_;
+    // The camera's frame counter, as in upstream LUCID's driver. Gaps in it
+    // show frames the camera produced that were never published.
+    image_msg.header.frame_id = std::to_string(pImage->GetFrameId());
 
     //
     // 2 ) Height
